@@ -22,8 +22,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/tetratelabs/run"
-
 	"github.com/dio/rundown/internal/archives"
 )
 
@@ -67,34 +65,4 @@ func MakeCmd(binary string, args []string, out io.Writer) *exec.Cmd {
 	}
 	cmd.Stderr = os.Stderr
 	return cmd
-}
-
-// CanBeDisabled hold a service that can be disabled.
-type CanBeDisabled struct {
-	disabled bool
-	g        *run.Group
-	s        run.Service
-}
-
-// Manage delegate disabled checking to this object.
-func (c *CanBeDisabled) Manage(g *run.Group, s run.Service, flags *run.FlagSet) {
-	if g == nil {
-		return
-	}
-	flags.BoolVar(
-		&c.disabled,
-		"disable-"+s.Name(),
-		false,
-		"Disable "+s.Name())
-	c.g = g
-	c.s = s
-}
-
-// IsTrue returns true when a managed service is disabled.
-func (c *CanBeDisabled) IsTrue() bool {
-	if c.g == nil || !c.disabled {
-		return false
-	}
-	c.g.Deregister(c.s)
-	return true
 }
