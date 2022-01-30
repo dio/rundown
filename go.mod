@@ -8,6 +8,7 @@ require (
 	github.com/dio/runauthservice v0.0.0-20220130000924-6ca930feb5c5
 	github.com/envoyproxy/go-control-plane v0.10.1
 	github.com/envoyproxy/protoc-gen-validate v0.6.3
+	github.com/iancoleman/strcase v0.2.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tetratelabs/run v0.1.2
 	github.com/tetratelabs/telemetry v0.7.1
