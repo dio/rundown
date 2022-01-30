@@ -21,7 +21,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/tetratelabs/run"
@@ -31,6 +30,7 @@ import (
 	"github.com/dio/rundown/generated/config"
 	"github.com/dio/rundown/internal/archives"
 	"github.com/dio/rundown/internal/downloader"
+	"github.com/dio/rundown/internal/managed"
 	"github.com/dio/rundown/internal/runner"
 )
 
@@ -41,11 +41,8 @@ var (
 	DefaultDownloadTimeout = 30 * time.Second
 )
 
-// Config holds the configuration object for running auth_server.
+// Config holds the configuration object for running the auth_server.
 type Config struct {
-	Version string
-	// Location where the binary will be downloaded.
-	Dir          string
 	Logger       telemetry.Logger
 	FilterConfig *config.Config
 }
@@ -57,23 +54,22 @@ func New(g *run.Group, cfg *Config) *Service {
 		cfg = &Config{} // TODO(dio): Have a way to generate default config.
 	}
 	return &Service{
-		cfg:      cfg,
-		g:        g,
-		archive:  &archives.ExtAuthz{},
-		disabled: &runner.CanBeDisabled{},
+		cfg:     cfg,
+		g:       g,
+		archive: &archives.ExtAuthz{},
+		managed: &managed.Flags{
+			DefaultVersion: DefaultBinaryVersion,
+		},
 	}
 }
 
 // Service is a run.Service implementation that runs auth_server.
 type Service struct {
-	cfg              *Config
-	cmd              *exec.Cmd
-	binaryPath       string
-	configPath       string
-	filterConfigFile string
-	archive          *archives.ExtAuthz
-	g                *run.Group
-	disabled         *runner.CanBeDisabled
+	cfg     *Config
+	g       *run.Group
+	archive *archives.ExtAuthz
+	managed *managed.Flags
+	cmd     *exec.Cmd
 }
 
 var _ run.Config = (*Service)(nil)
@@ -86,40 +82,18 @@ func (s *Service) Name() string {
 // FlagSet provides command line flags for external auth-service.
 func (s *Service) FlagSet() *run.FlagSet {
 	flags := run.NewFlagSet("External AuthN/AuthZ Service options")
-	flags.StringVar(
-		&s.filterConfigFile,
-		s.flagName("config"),
-		s.filterConfigFile,
-		"Path to the filter config file")
-
-	flags.StringVar(
-		&s.cfg.Version,
-		s.flagName("version"),
-		DefaultBinaryVersion,
-		"External auth server version")
-
-	flags.StringVar(
-		&s.cfg.Dir,
-		s.flagName("directory"),
-		os.Getenv(strings.ToUpper(s.Name())+"_HOME"),
-		"External auth server version")
-
-	s.disabled.Manage(s.g, s, flags)
+	s.managed.Manage(flags, s.g, s)
 	return flags
-}
-
-func (s *Service) flagName(name string) string {
-	return s.Name() + "-" + name
 }
 
 // Validate validates the given configuration.
 func (s *Service) Validate() error {
-	if s.disabled.IsTrue() {
+	if s.managed.IsDisabled() {
 		return nil
 	}
 
-	if s.filterConfigFile != "" {
-		b, err := os.ReadFile(s.filterConfigFile)
+	if s.managed.ConfigFile != "" {
+		b, err := os.ReadFile(s.managed.ConfigFile)
 		if err != nil {
 			return err
 		}
@@ -138,24 +112,24 @@ func (s *Service) Validate() error {
 
 // PreRun prepares the biany to run.
 func (s *Service) PreRun() (err error) {
-	if s.cfg.Dir == "" {
+	if s.managed.Dir == "" {
 		// To make sure we have a work directory.
 		dir, err := ioutil.TempDir("", s.archive.BinaryName())
 		if err != nil {
 			return nil
 		}
-		s.cfg.Dir = dir
+		s.managed.Dir = dir
 	}
 
-	if s.cfg.Version != "" {
-		s.archive.VersionUsed = s.cfg.Version
+	if s.managed.Version != "" {
+		s.archive.VersionUsed = s.managed.Version
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultDownloadTimeout)
 	defer cancel()
 
 	// Check and download the versioned binary.
-	s.binaryPath, err = downloader.DownloadVersionedBinary(ctx, s.archive, s.cfg.Dir)
+	binaryPath, err := downloader.DownloadVersionedBinary(ctx, s.archive, s.managed.Dir)
 	if err != nil {
 		return err
 	}
@@ -166,20 +140,19 @@ func (s *Service) PreRun() (err error) {
 		return err
 	}
 
-	tmp, err := os.CreateTemp(s.cfg.Dir, "*.json")
+	tmp, err := os.CreateTemp(s.managed.Dir, "*.json")
 	if err != nil {
 		return err
 	}
 	if err != nil {
 		return err
 	}
-	s.configPath = tmp.Name()
-
 	if _, err = tmp.Write(jsonConfig); err != nil {
 		return err
 	}
 
-	s.cmd = runner.MakeCmd(s.binaryPath, []string{"--filter_config", s.configPath}, os.Stdout)
+	configPath := tmp.Name() // effective config path.
+	s.cmd = runner.MakeCmd(binaryPath, []string{"--filter_config", configPath}, os.Stdout)
 	return nil
 }
 
