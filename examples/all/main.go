@@ -23,18 +23,18 @@ import (
 	"github.com/tetratelabs/telemetry"
 
 	extauthz "github.com/dio/rundown/api/ext_authz"
-	"github.com/dio/rundown/api/proxy"
+	envoy "github.com/dio/rundown/api/proxy"
 )
 
 func main() {
 	var (
 		logger        = telemetry.NoopLogger()
 		g             = &run.Group{Name: "example", Logger: logger}
-		extAuthz      = extauthz.New(g, &extauthz.Config{Logger: logger})
-		envoy         = proxy.New(g, &proxy.Config{Logger: logger})
+		extAuthz      = extauthz.New(g, &extauthz.Config{Logger: g.Logger})
+		proxy         = envoy.New(g, &envoy.Config{Logger: g.Logger})
 		signalHandler = new(runsignal.Handler)
 	)
-	g.Register(extAuthz, envoy, signalHandler)
+	g.Register(extAuthz, proxy, signalHandler)
 	if err := g.Run(); err != nil {
 		fmt.Printf("program exit: %+v\n", err)
 		os.Exit(1)

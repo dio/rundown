@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+.PHONY: license
+
 # Include versions of tools we build or fetch on-demand.
 include Tools.mk
 
@@ -84,7 +86,7 @@ check: # Make sure we follow the rules
 	fi
 
 license_ignore :=
-license_files  := api example internal buf.*.yaml
+license_files  := api example internal buf.*.yaml Makefile *.mk
 license: $(addlicense)
 	@$(addlicense) $(license_ignore) -c "Dhi Aurrahman"  $(license_files) 1>/dev/null 2>&1
 

@@ -22,8 +22,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/dio/rundown/internal/archives"
 	"github.com/tetratelabs/run"
+
+	"github.com/dio/rundown/internal/archives"
 )
 
 // Run runs the prepared cmd, given an archive.

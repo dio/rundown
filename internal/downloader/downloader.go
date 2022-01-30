@@ -25,8 +25,9 @@ import (
 
 	"github.com/bazelbuild/bazelisk/httputil"
 	"github.com/codeclysm/extract"
-	"github.com/dio/rundown/internal/archives"
 	"github.com/ulikunitz/xz"
+
+	"github.com/dio/rundown/internal/archives"
 )
 
 // DownloadVersionedBinary returns the downloaded binary file path.
