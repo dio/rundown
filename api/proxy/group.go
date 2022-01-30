@@ -46,8 +46,9 @@ var (
 
 // Config holds the configuration object for running the proxy.
 type Config struct {
-	Logger      telemetry.Logger
-	ProxyConfig *bootstrapv3.Bootstrap
+	Logger         telemetry.Logger
+	ProxyConfig    *bootstrapv3.Bootstrap
+	GenerateConfig func() (*bootstrapv3.Bootstrap, error)
 }
 
 // New returns a new run.Service that wraps envoy binary. Setting the cfg to nil, expecting setting
@@ -93,6 +94,14 @@ func (s *Service) FlagSet() *run.FlagSet {
 func (s *Service) Validate() error {
 	if s.managed.IsDisabled() {
 		return nil
+	}
+
+	if s.cfg.GenerateConfig != nil {
+		generated, err := s.cfg.GenerateConfig()
+		if err != nil {
+			return err
+		}
+		s.cfg.ProxyConfig = generated
 	}
 
 	if s.managed.ConfigFile != "" {
