@@ -18,4 +18,4 @@ go run main.go --proxy-config path/to/configs/proxy.yaml --disable-external-auth
 
 Please refer to [authservice/docs](../authservice/docs/README.md) to author a valid configuration for the `auth_server`.
 
-The [config.json](./config.json) used in this example is taken from https://github.com/dio/authservice/blob/3f884b8d37b0d754751182fd8b67453f3cf0f4b0/bookinfo-example/config/authservice-configmap-template-for-authn.yaml#L14-L48.
+The [ext_authz.json](../configs/ext_authz.json) used in this example is taken from https://github.com/dio/authservice/blob/3f884b8d37b0d754751182fd8b67453f3cf0f4b0/bookinfo-example/config/authservice-configmap-template-for-authn.yaml#L14-L48.
