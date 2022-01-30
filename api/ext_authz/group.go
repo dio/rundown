@@ -43,8 +43,9 @@ var (
 
 // Config holds the configuration object for running the auth_server.
 type Config struct {
-	Logger       telemetry.Logger
-	FilterConfig *config.Config
+	Logger         telemetry.Logger
+	FilterConfig   *config.Config
+	GenerateConfig func() (*config.Config, error)
 }
 
 // New returns a new run.Service that wraps auth_server binary. Setting the cfg to nil, expecting
@@ -90,6 +91,14 @@ func (s *Service) FlagSet() *run.FlagSet {
 func (s *Service) Validate() error {
 	if s.managed.IsDisabled() {
 		return nil
+	}
+
+	if s.cfg.GenerateConfig != nil {
+		generated, err := s.cfg.GenerateConfig()
+		if err != nil {
+			return err
+		}
+		s.cfg.FilterConfig = generated
 	}
 
 	if s.managed.ConfigFile != "" {
