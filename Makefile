@@ -17,6 +17,8 @@
 # Include versions of tools we build or fetch on-demand.
 include Tools.mk
 
+name := rundown
+
 # Root dir returns absolute path of current directory. It has a trailing "/".
 root_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
@@ -64,6 +66,27 @@ proto_tools := \
 export BUF_CACHE_DIR := $(root_dir).cache/buf
 BUF_V1_MODULE_DATA   := $(BUF_CACHE_DIR)/v1/module/data/buf.build
 
+
+# This is adopted from https://github.com/tetratelabs/func-e/blob/3df66c9593e827d67b330b7355d577f91cdcb722/Makefile#L60-L76.
+# ANSI escape codes. f_ means foreground, b_ background.
+# See https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
+f_black            := $(shell printf "\33[30m")
+b_black            := $(shell printf "\33[40m")
+f_white            := $(shell printf "\33[97m")
+f_gray             := $(shell printf "\33[37m")
+f_dark_gray        := $(shell printf "\33[90m")
+f_bright_cyan      := $(shell printf "\33[96m")
+b_bright_cyan      := $(shell printf "\33[106m")
+ansi_reset         := $(shell printf "\33[0m")
+ansi_$(name)       := $(b_black)$(f_black)$(b_bright_cyan)$(name)$(ansi_reset)
+ansi_format_dark   := $(f_gray)$(f_bright_cyan)%-10s$(ansi_reset) $(f_dark_gray)%s$(ansi_reset)\n
+ansi_format_bright := $(f_white)$(f_bright_cyan)%-10s$(ansi_reset) $(f_black)$(b_bright_cyan)%s$(ansi_reset)\n
+
+# This formats help statements in ANSI colors. To hide a target from help, don't comment it with a trailing '##'.
+help: ## Describe how to use each target
+	@printf "$(ansi_$(name))$(f_white)\n"
+	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "$(ansi_format_dark)", $$1, $$2}' $(MAKEFILE_LIST)
+
 # By default, unless GOMAXPROCS is set via an environment variable or explicity in the code, the
 # tests are run with GOMAXPROCS=1. This is problematic if the tests require more than one CPU, for
 # example when running t.Parallel() in tests.
@@ -71,13 +94,13 @@ export GOMAXPROCS ?=4
 test: ## Run all unit tests
 	@$(go) test ./internal/...
 
-gen: $(BUF_V1_MODULE_DATA)
+gen: $(BUF_V1_MODULE_DATA) ## To generate generated files from *.proto
 	@$(buf) generate
 
-update: # Update authservice to latest commit
+update: ## Update authservice to latest commit
 	@git submodule update --remote --merge
 
-check: # Make sure we follow the rules
+check: ## Make sure we follow the rules
 	@rm -fr generated
 	@$(MAKE) gen format lint license
 	@if [ ! -z "`git status -s`" ]; then \
@@ -87,7 +110,7 @@ check: # Make sure we follow the rules
 
 license_ignore :=
 license_files  := api example internal buf.*.yaml Makefile *.mk
-license: $(addlicense)
+license: $(addlicense) ## To add license
 	@$(addlicense) $(license_ignore) -c "Dhi Aurrahman"  $(license_files) 1>/dev/null 2>&1
 
 all_nongen_go_sources := $(wildcard api/*.go example/*.go internal/*.go internal/*/*.go internal/*/*/*.go)
@@ -103,7 +126,7 @@ format: go.mod $(all_nongen_go_sources) $(goimports)
 
 # Override lint cache directory. https://golangci-lint.run/usage/configuration/#cache.
 export GOLANGCI_LINT_CACHE=$(CACHE_DIR)/golangci-lint
-lint: .golangci.yml $(all_nongen_go_sources) $(golangci-lint)
+lint: .golangci.yml $(all_nongen_go_sources) $(golangci-lint) ## Lint all Go sources
 	@printf "$(ansi_format_dark)" $@ "linting Go files..."
 	@$(golangci-lint) run --timeout 5m --config $< ./...
 	@printf "$(ansi_format_bright)" $@ "ok"
