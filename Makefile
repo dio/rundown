@@ -99,6 +99,7 @@ test: ## Run all unit tests
 gen: $(BUF_V1_MODULE_DATA) ## To generate generated files from *.proto
 	$(call buf-generate,authservice)
 	$(call buf-generate,ratelimit)
+	$(call buf-generate,xds)
 
 define buf-generate
 	@$(buf) generate $1 --template generators/$1.gen.yaml
@@ -117,7 +118,7 @@ check: ## Make sure we follow the rules
 	fi
 
 license_ignore :=
-license_files  := api example internal ratelimit buf.*.yaml Makefile *.mk
+license_files  := api examples internal ratelimit buf.*.yaml Makefile *.mk
 license: $(addlicense) ## To add license
 	@$(addlicense) $(license_ignore) -c "Dhi Aurrahman"  $(license_files) 1>/dev/null 2>&1
 

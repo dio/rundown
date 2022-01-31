@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/bazelbuild/bazelisk v1.11.0
 	github.com/codeclysm/extract v2.2.0+incompatible
-	github.com/envoyproxy/go-control-plane v0.10.1
+	github.com/envoyproxy/go-control-plane v0.10.2-0.20220128233943-cf8dcaf571d7
 	github.com/envoyproxy/protoc-gen-validate v0.6.3
 	github.com/envoyproxy/ratelimit v1.4.1-0.20220124185553-8d6488ead861
 	github.com/iancoleman/strcase v0.2.0
@@ -13,6 +13,7 @@ require (
 	github.com/tetratelabs/run v0.1.2
 	github.com/tetratelabs/telemetry v0.7.1
 	github.com/ulikunitz/xz v0.5.10
+	google.golang.org/grpc v1.36.0
 	google.golang.org/protobuf v1.27.1
 	sigs.k8s.io/yaml v1.3.0
 )
@@ -47,7 +48,6 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
-	google.golang.org/grpc v1.36.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )

@@ -15,32 +15,49 @@
 package main
 
 import (
+	_ "embed" // to allow embedding files.
 	"fmt"
 	"os"
 
 	"github.com/tetratelabs/run"
 	runsignal "github.com/tetratelabs/run/pkg/signal"
 	"github.com/tetratelabs/telemetry"
+	"google.golang.org/protobuf/encoding/protojson"
+	"sigs.k8s.io/yaml"
 
-	extauthz "github.com/dio/rundown/api/ext_authz"
-	envoy "github.com/dio/rundown/api/proxy"
-	ratelimit "github.com/dio/rundown/api/ratelimit"
-	xds "github.com/dio/rundown/api/xds"
+	"github.com/dio/rundown/api/ratelimit"
+	settingsv1 "github.com/dio/rundown/generated/ratelimit/settings/v1"
 )
+
+//go:embed ratelimit.yaml
+var configYAML []byte
 
 func main() {
 	var (
-		logger        = telemetry.NoopLogger()
-		g             = &run.Group{Name: "example", Logger: logger}
-		xDS           = xds.New(g, &xds.Config{Logger: g.Logger})
-		extAuthz      = extauthz.New(g, &extauthz.Config{Logger: g.Logger})
-		rateLimit     = ratelimit.New(g, &ratelimit.Config{Logger: g.Logger})
-		proxy         = envoy.New(g, &envoy.Config{Logger: g.Logger})
+		logger    = telemetry.NoopLogger()
+		g         = &run.Group{Name: "example", Logger: logger}
+		rateLimit = ratelimit.New(g, &ratelimit.Config{
+			Logger:         g.Logger,
+			GenerateConfig: generate,
+		})
 		signalHandler = new(runsignal.Handler)
 	)
-	g.Register(xDS, extAuthz, rateLimit, proxy, signalHandler)
+	g.Register(rateLimit, signalHandler)
 	if err := g.Run(); err != nil {
 		fmt.Printf("program exit: %+v\n", err)
 		os.Exit(1)
 	}
+}
+
+func generate() (*settingsv1.Settings, error) {
+	j, err := yaml.YAMLToJSON(configYAML)
+	if err != nil {
+		return nil, err
+	}
+	var config settingsv1.Settings
+	err = protojson.Unmarshal(j, &config)
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
 }

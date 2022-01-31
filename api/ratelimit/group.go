@@ -34,8 +34,9 @@ import (
 
 // Config holds the configuration object for running the rate-limit service.
 type Config struct {
-	Logger   telemetry.Logger
-	Settings *settingsv1.Settings
+	Logger         telemetry.Logger
+	Settings       *settingsv1.Settings
+	GenerateConfig func() (*settingsv1.Settings, error)
 }
 
 // New returns a new run.Service that wraps rate-limit service. Setting the cfg to nil, expecting
@@ -100,8 +101,16 @@ func (s *Service) Validate() error {
 		s.cfg.Settings = &cfg
 	}
 
+	if s.cfg.GenerateConfig != nil {
+		generated, err := s.cfg.GenerateConfig()
+		if err != nil {
+			return err
+		}
+		s.cfg.Settings = generated
+	}
+
 	if s.cfg.Settings == nil {
-		return errors.New("proxy config is required")
+		return errors.New("rate limit service config is required")
 	}
 	return s.cfg.Settings.ValidateAll()
 }

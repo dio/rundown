@@ -5,13 +5,19 @@ This is an example of using [`github.com/dio/rundown/api/ext_authz`](../../api/e
 To run the auth service only:
 
 ```console
-go run main.go --external-auth-service-config path/to/configs/ext_authz.json --disable-proxy
+go run main.go --external-auth-service-config path/to/configs/ext_authz.json --disable-proxy-rate-limit-service --disable-proxy
+```
+
+To run the rate limit service only:
+
+```console
+go run main.go --rate-limit-service-config path/to/configs/ratelimit.yaml --disable-external-auth-service --disable-proxy
 ```
 
 To run the proxy only:
 
 ```console
-go run main.go --proxy-config path/to/configs/proxy.yaml --disable-external-auth-service
+go run main.go --proxy-config path/to/configs/proxy.yaml --disable-external-auth-service --disable-proxy-rate-limit-service
 ```
 
 ## Config

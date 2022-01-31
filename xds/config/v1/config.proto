@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package config.v1;
+
+import "google/protobuf/wrappers.proto";
+
+message Config {
+  // Server host.
+  google.protobuf.StringValue host = 1;
+  // Server port.
+  google.protobuf.UInt32Value port = 2;
+}

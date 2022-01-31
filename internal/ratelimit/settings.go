@@ -15,6 +15,9 @@
 package ratelimit
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/envoyproxy/ratelimit/src/settings"
 
 	settingsv1 "github.com/dio/rundown/generated/ratelimit/settings/v1"
@@ -63,16 +66,31 @@ func NewSettings(s *settingsv1.Settings) settings.Settings { //nolint:gocyclo
 		c.LogFormat = s.LogFormat.Value // TODO(dio): Enumerate this.
 	}
 
-	// Stats-related settings.
+	// Statsd-related settings. The github.com/envoyproxy/ratelimit uses github.com/lyft/gostats for
+	// setting up statsd, the library expects environment USE_STATSD and STATSD_* variables, namely:
+	//   - USE_STATSD, defaults to true.
+	//   - STATSD_HOST, defaults to "localhost".
+	//   - STATSD_PORT, defaults to 8125.
+	// Reference: https://github.com/lyft/gostats/blob/aa005a717918424bef89063bdac8772d976782f8/settings.go#L28-L34.
+	//
+	// Note: STATSD_PROTOCOL, defaults to "tcp", is not exposed by github.com/envoyproxy/ratelimit.
+	// See https://github.com/envoyproxy/ratelimit/blob/8d6488ead8618ce49a492858321dae946f2d97bc/src/settings/settings.go#L34-L36.
+	//
+	// Hence, we also do setenv here.
 	if s.UseStatsd != nil {
 		c.UseStatsd = s.UseStatsd.Value
+		_ = os.Setenv("USE_STATSD", fmt.Sprintf("%t", c.UseStatsd))
 	}
 	if s.StatsdHost != nil {
 		c.StatsdHost = s.StatsdHost.Value
+		_ = os.Setenv("STATSD_HOST", c.StatsdHost)
 	}
 	if s.StatsdPort != nil {
 		c.StatsdPort = int(s.StatsdPort.Value)
+		_ = os.Setenv("STATSD_PORT", fmt.Sprintf("%d", c.StatsdPort))
 	}
+	// While this ExtraTags field is also considered as a setting for statsd, this one is not being
+	// passed to github.com/lyft/gostats through environment variables.
 	if s.ExtraTags != nil {
 		c.ExtraTags = s.ExtraTags
 	}
