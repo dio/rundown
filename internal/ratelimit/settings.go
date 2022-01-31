@@ -230,5 +230,3 @@ func NewSettings(s *settingsv1.Settings) settings.Settings { //nolint:gocyclo
 	}
 	return c
 }
-
-// Merge github.com/envoyproxy/ratelimit/src/settings with the one we have from YAML-based loading.
