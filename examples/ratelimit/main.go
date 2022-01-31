@@ -34,15 +34,15 @@ var configYAML []byte
 
 func main() {
 	var (
-		logger    = telemetry.NoopLogger()
-		g         = &run.Group{Name: "example", Logger: logger}
-		rateLimit = ratelimit.New(g, &ratelimit.Config{
+		logger          = telemetry.NoopLogger()
+		g               = &run.Group{Name: "example", Logger: logger}
+		ratelimitServer = ratelimit.New(g, &ratelimit.Config{
 			Logger:         g.Logger,
 			GenerateConfig: generate,
 		})
 		signalHandler = new(runsignal.Handler)
 	)
-	g.Register(rateLimit, signalHandler)
+	g.Register(ratelimitServer, signalHandler)
 	if err := g.Run(); err != nil {
 		fmt.Printf("program exit: %+v\n", err)
 		os.Exit(1)
