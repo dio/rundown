@@ -39,23 +39,19 @@ func (m *Flags) Manage(flags *run.FlagSet, g *run.Group, s run.Service) {
 	if g == nil {
 		return
 	}
-
 	title := titleize(s.Name())
 
-	// --<name>-config. For example: --proxy-config.
-	flags.StringVar(
-		&m.ConfigFile,
-		s.Name()+"-config",
-		m.ConfigFile,
-		"Path to the "+title+" config file")
-
-	// --<name>-version. For example: --proxy-version.
-	flags.StringVar(
-		&m.Version,
-		s.Name()+"-version",
-		m.DefaultVersion,
-		title+" version",
-	)
+	// When default version is not defined, we should not register the version flag, since it is
+	// probably hardcoded or not relevant (e.g. for internal implementation).
+	if m.DefaultVersion != "" {
+		// --<name>-version. For example: --proxy-version.
+		flags.StringVar(
+			&m.Version,
+			s.Name()+"-version",
+			m.DefaultVersion,
+			title+" version",
+		)
+	}
 
 	// --<name>-directory. For example: --proxy-directory.
 	flags.StringVar(
@@ -64,6 +60,13 @@ func (m *Flags) Manage(flags *run.FlagSet, g *run.Group, s run.Service) {
 		os.Getenv(strcase.ToScreamingSnake(s.Name())+"_HOME"),
 		"Path to the "+title+" work directory",
 	)
+
+	// --<name>-config. For example: --proxy-config.
+	flags.StringVar(
+		&m.ConfigFile,
+		s.Name()+"-config",
+		m.ConfigFile,
+		"Path to the "+title+" config file")
 
 	// --disable-<name>. For example: --disable-proxy.
 	flags.BoolVar(

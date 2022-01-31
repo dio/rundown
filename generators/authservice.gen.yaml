@@ -16,14 +16,14 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: github.com/dio/runauthservice/generated
+    default: github.com/dio/rundown/generated/authservice
     except:
       - buf.build/envoyproxy/protoc-gen-validate
 
 plugins:
-  - remote: buf.build/library/plugins/go:v1.27.1-1
-    out: generated
+  - name: go
+    out: generated/authservice
     opt: paths=source_relative
   - name: validate
-    out: generated
+    out: generated/authservice
     opt: paths=source_relative,lang=go

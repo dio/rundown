@@ -67,7 +67,7 @@ func New(g *run.Group, cfg *Config) *Service {
 	}
 }
 
-// Service is a run.Service implementation that runs auth_server.
+// Service is a run.Service implementation that runs the proxy.
 type Service struct {
 	cfg     *Config
 	g       *run.Group
@@ -83,7 +83,7 @@ func (s *Service) Name() string {
 	return "proxy"
 }
 
-// FlagSet provides command line flags for external auth-service.
+// FlagSet provides command line flags for the proxy.
 func (s *Service) FlagSet() *run.FlagSet {
 	flags := run.NewFlagSet("Proxy Service options")
 	s.managed.Manage(flags, s.g, s)
@@ -131,7 +131,7 @@ func (s *Service) Validate() error {
 	return s.cfg.ProxyConfig.ValidateAll()
 }
 
-// PreRun prepares the biany to run.
+// PreRun prepares the binary to run.
 func (s *Service) PreRun() (err error) {
 	if s.managed.Dir == "" {
 		// To make sure we have a work directory.
@@ -155,7 +155,7 @@ func (s *Service) PreRun() (err error) {
 		return err
 	}
 
-	// Generate JSON config to run the auth_server. See: authservice/docs/README.md.
+	// Generate JSON config to run the proxy.
 	jsonConfig, err := protojson.Marshal(s.cfg.ProxyConfig)
 	if err != nil {
 		return err

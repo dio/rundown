@@ -52,13 +52,15 @@ clang-format := $(prepackaged_tools_dir)/bin/clang-format
 # Go-based tools.
 addlicense          := $(go_tools_dir)/addlicense
 buf                 := $(go_tools_dir)/buf
-protoc-gen-validate := $(go_tools_dir)/protoc-gen-validate
-golangci-lint       := $(go_tools_dir)/golangci-lint
 goimports           := $(go_tools_dir)/goimports
+golangci-lint       := $(go_tools_dir)/golangci-lint
+protoc-gen-go       := $(go_tools_dir)/protoc-gen-go
+protoc-gen-validate := $(go_tools_dir)/protoc-gen-validate
 
 # Assorted tools required for processing proto files.
 proto_tools := \
 	$(buf) \
+	$(protoc-gen-go) \
 	$(protoc-gen-validate)
 
 # We cache the deps fetched by buf locally (in-situ) by setting BUF_CACHE_DIR
@@ -95,7 +97,12 @@ test: ## Run all unit tests
 	@$(go) test ./internal/...
 
 gen: $(BUF_V1_MODULE_DATA) ## To generate generated files from *.proto
-	@$(buf) generate
+	$(call buf-generate,authservice)
+	$(call buf-generate,ratelimit)
+
+define buf-generate
+	@$(buf) generate $1 --template generators/$1.gen.yaml
+endef
 
 update: ## Update authservice to latest commit
 	@git submodule update --remote --merge
@@ -103,13 +110,14 @@ update: ## Update authservice to latest commit
 check: ## Make sure we follow the rules
 	@rm -fr generated
 	@$(MAKE) gen format lint license
+	@$(go) mod tidy
 	@if [ ! -z "`git status -s`" ]; then \
 		echo "The following differences will fail CI until committed:"; \
 		git diff --exit-code; \
 	fi
 
 license_ignore :=
-license_files  := api example internal buf.*.yaml Makefile *.mk
+license_files  := api example internal ratelimit buf.*.yaml Makefile *.mk
 license: $(addlicense) ## To add license
 	@$(addlicense) $(license_ignore) -c "Dhi Aurrahman"  $(license_files) 1>/dev/null 2>&1
 
