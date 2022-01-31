@@ -98,11 +98,11 @@ test: ## Run all unit tests
 
 # "externals/authservice" has a special rule for now, since we do not want to touch its *.proto.
 gen: $(BUF_V1_MODULE_DATA) ## To generate generated files from *.proto
-	@$(call buf-generate,externals/authservice)
-	@$(call buf-generate,proto)
+	$(call buf-generate,externals/authservice)
+	$(call buf-generate,proto)
 
 define buf-generate
-	$(buf) generate $1 --template generators/$1.gen.yaml
+	@$(buf) generate $1 --template generators/$1.gen.yaml
 endef
 
 update: ## Update authservice to latest commit
