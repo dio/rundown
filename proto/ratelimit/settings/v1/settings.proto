@@ -14,15 +14,17 @@
 
 syntax = "proto3";
 
-package settings.v1;
+package ratelimit.settings.v1;
+
+option go_package = "github.com/dio/rundown/generated/ratelimit/settings/v1";
 
 import "google/protobuf/duration.proto";
 import "google/protobuf/wrappers.proto";
 
-// This is the proto representation of https://github.com/envoyproxy/ratelimit/blob/main/src/settings/settings.go.
+// This is the proto representation of https://github.com/envoyproxy/ratelimit/blob/8d6488ead8618ce49a492858321dae946f2d97bc/src/settings/settings.go.
 // This is manually syncronized. The default values, are provided through: ratelimit/settings.go.
 // TODO(dio): Parse https://github.com/envoyproxy/ratelimit/blob/main/src/settings/settings.go and
-// generate this message.
+// generate this message (always to sync with main).
 message Settings {
   // Default: "0.0.0.0".
   google.protobuf.StringValue host = 1;

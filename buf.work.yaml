@@ -14,6 +14,5 @@
 
 version: v1
 directories:
-  - authservice
-  - ratelimit
-  - xds
+  - externals/authservice # Currently we don't touch the structure of authservice *.proto foldering.
+  - proto

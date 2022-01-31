@@ -1,3 +1,3 @@
-[submodule "authservice"]
-	path = authservice
+[submodule "externals/authservice"]
+	path = externals/authservice
 	url = https://github.com/dio/authservice.git

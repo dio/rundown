@@ -14,9 +14,11 @@
 
 syntax = "proto3";
 
-package config.v1;
+package xds.config.v1;
 
 import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/dio/rundown/generated/xds/config/v1";
 
 message Config {
   // Server host.
