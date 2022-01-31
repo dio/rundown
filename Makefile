@@ -109,8 +109,8 @@ update: ## Update authservice to latest commit
 
 check: ## Make sure we follow the rules
 	@rm -fr generated
-	@$(go) mod tidy
 	@$(MAKE) gen format lint license
+	@$(go) mod tidy
 	@if [ ! -z "`git status -s`" ]; then \
 		echo "The following differences will fail CI until committed:"; \
 		git diff --exit-code; \
