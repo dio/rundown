@@ -27,7 +27,7 @@ import (
 	"github.com/tetratelabs/telemetry"
 	"google.golang.org/protobuf/encoding/protojson"
 
-	"github.com/dio/rundown/generated/config"
+	"github.com/dio/rundown/generated/authservice/config"
 	"github.com/dio/rundown/internal/archives"
 	"github.com/dio/rundown/internal/downloader"
 	"github.com/dio/rundown/internal/managed"
@@ -110,7 +110,7 @@ func (s *Service) Validate() error {
 	return s.cfg.FilterConfig.ValidateAll()
 }
 
-// PreRun prepares the biany to run.
+// PreRun prepares the binary to run.
 func (s *Service) PreRun() (err error) {
 	if s.managed.Dir == "" {
 		// To make sure we have a work directory.

@@ -1,0 +1,158 @@
+// Copyright 2022 Dhi Aurrahman
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package ratelimit.settings;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/wrappers.proto";
+
+// This is the proto representation of https://github.com/envoyproxy/ratelimit/blob/main/src/settings/settings.go.
+// This is manually syncronized. The default values, are provided through: ratelimit/settings.go.
+// TODO(dio): Parse https://github.com/envoyproxy/ratelimit/blob/main/src/settings/settings.go and
+// generate this message.
+message Settings {
+  // Default: "0.0.0.0".
+  google.protobuf.StringValue host = 1;
+  // Default: 8080.
+  google.protobuf.UInt32Value port = 2;
+  // Default: "0.0.0.0".
+  google.protobuf.StringValue grpc_host = 3;
+  // Default: 8081.
+  google.protobuf.UInt32Value grpc_port = 4;
+  // Default: "0.0.0.0".
+  google.protobuf.StringValue debug_host = 5;
+  // Default: 6070.
+  google.protobuf.UInt32Value debug_port = 6;
+
+  // GrpcMaxConnectionAge is a duration for the maximum amount of time a connection may exist before
+  // it will be closed by sending a GoAway. A random jitter of +/-10% will be added to
+  // MaxConnectionAge to spread out connection storms.
+  // Default: 24h.
+  google.protobuf.Duration grpc_max_connection_age = 7;
+  // GrpcMaxConnectionAgeGrace is an additive period after MaxConnectionAge after which the
+  // connection will be forcibly closed.
+  // Default: 1h.
+  google.protobuf.Duration grpc_max_connection_age_grace = 8;
+
+  // Default: "WARN".
+  google.protobuf.StringValue log_level = 9;
+  // Default: "text".
+  google.protobuf.StringValue log_format = 10;
+
+  // Default: true.
+  google.protobuf.BoolValue use_statsd = 11;
+  // Default: "localhost".
+  google.protobuf.StringValue statsd_host = 12;
+  // Default: 8125.
+  google.protobuf.UInt32Value statsd_port = 13;
+  map<string,string> extra_tags = 14;
+
+  // Default: "/srv/runtime_data/current".
+  google.protobuf.StringValue runtime_path = 15;
+  google.protobuf.StringValue runtime_subdirectory = 16;
+  // Default: false.
+  google.protobuf.BoolValue runtime_ignore_dot_files = 17;
+  // Default: true.
+  google.protobuf.BoolValue runtime_watch_root = 18;
+
+  // Default: 300.
+  google.protobuf.Int64Value expiration_jitter_max_seconds = 19;
+  // Default: 0.
+  google.protobuf.UInt32Value local_cache_size_in_bytes = 20;
+  // Default: 0.8
+  google.protobuf.FloatValue near_limit_ratio = 21;
+  google.protobuf.StringValue cache_key_prefix = 22;
+  // Default: "redis".
+  google.protobuf.StringValue backend_type = 23;
+
+	// Settings for optional returning of custom headers
+  // Default: false.
+  google.protobuf.BoolValue rate_limit_response_headers_enabled = 24;
+  // Hold the current limit.
+  // Default: "Ratelimit-Limit".
+  google.protobuf.StringValue header_ratelimit_limit = 25;
+  // Hold the remaining count.
+  // Default: "Ratelimit-Remaining".
+  google.protobuf.StringValue header_ratelimit_remaining = 26;
+  // Hold the remaining second.
+  // Default: RateLimit-Reset
+  google.protobuf.StringValue header_ratelimit_reset = 27;
+
+  // Default: "unix".
+  google.protobuf.StringValue redis_socket_type = 28;
+  // Default: "SINGLE".
+  google.protobuf.StringValue redis_type = 29;
+  // Default: "/var/run/nutcracker/ratelimit.sock".
+  google.protobuf.StringValue redis_url = 30;
+  // Default: 10.
+  google.protobuf.UInt32Value redis_pool_size = 31;
+  google.protobuf.StringValue redis_auth = 32;
+  // Default: false.
+  google.protobuf.BoolValue redis_tls = 33;
+
+  // RedisPipelineWindow sets the duration after which internal pipelines will be flushed.
+	// If window is zero then implicit pipelining will be disabled. Radix use 150us for the
+	// default value, see https://github.com/mediocregopher/radix/blob/v3.5.1/pool.go#L278.
+  // Default: 0.
+  google.protobuf.Duration redis_pipeline_window = 34;
+  // RedisPipelineLimit sets maximum number of commands that can be pipelined before flushing.
+	// If limit is zero then no limit will be used and pipelines will only be limited by the specified
+  // time window.
+  // Default: 0.
+  google.protobuf.UInt32Value redis_pipeline_limit = 35;
+  // Default: false.
+  google.protobuf.BoolValue redis_per_second = 36;
+  // Default: "unix".
+  google.protobuf.StringValue redis_per_second_socket_type = 37;
+  // Default: "SINGLE".
+  google.protobuf.StringValue redis_per_second_type = 38;
+  // Default: "/var/run/nutcracker/ratelimitpersecond.sock".
+  google.protobuf.StringValue redis_per_second_url = 39;
+  // Default: 10.
+  google.protobuf.UInt32Value redis_per_second_pool_size = 40;
+  google.protobuf.StringValue redis_per_second_auth = 41;
+  // Default: false.
+  google.protobuf.BoolValue redis_per_second_tls = 42;
+  // RedisPerSecondPipelineWindow sets the duration after which internal pipelines will be flushed
+  // for per second redis. See comments of RedisPipelineWindow for details.
+  // Default: 0.
+  google.protobuf.Duration redis_per_second_pipeline_window = 43;
+  // RedisPerSecondPipelineLimit sets maximum number of commands that can be pipelined before
+  // flushing for per second redis. See comments of RedisPipelineLimit for details.
+  // Default: 0.
+  google.protobuf.UInt32Value redis_per_second_pipeline_limit = 44;
+  // Enable healthcheck to check Redis Connection. If there is no active connection, healthcheck
+  // failed.
+  // Default: false.
+  google.protobuf.BoolValue redis_health_check_active_connection = 45;
+
+  repeated string memcache_host_port = 46;
+  // MemcacheMaxIdleConns sets the maximum number of idle TCP connections per memcached node. The
+  // default is 2 as that is the default of the underlying library. This is the maximum number of
+  // connections to memcache kept idle in pool, if a connection is needed but none are idle a new
+  // connection is opened, used and closed and can be left in a time-wait state which can result in
+  // high CPU usage.
+  // Default: 2.
+  google.protobuf.UInt32Value memcache_max_idle_conns = 47;
+  google.protobuf.StringValue memcache_srv = 48;
+  // Default: 0.
+  google.protobuf.Duration memcache_srv_refresh = 49;
+
+  // Should the ratelimiting be running in Global shadow-mode, ie. never report a ratelimit status,
+  // unless a rate was provided from envoy as an override.
+  // Default: false.
+  google.protobuf.BoolValue global_shadown_mode = 50;
+}

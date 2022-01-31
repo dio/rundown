@@ -24,6 +24,7 @@ import (
 
 	extauthz "github.com/dio/rundown/api/ext_authz"
 	envoy "github.com/dio/rundown/api/proxy"
+	ratelimit "github.com/dio/rundown/api/ratelimit"
 )
 
 func main() {
@@ -31,10 +32,11 @@ func main() {
 		logger        = telemetry.NoopLogger()
 		g             = &run.Group{Name: "example", Logger: logger}
 		extAuthz      = extauthz.New(g, &extauthz.Config{Logger: g.Logger})
+		rateLimit     = ratelimit.New(g, &ratelimit.Config{Logger: g.Logger})
 		proxy         = envoy.New(g, &envoy.Config{Logger: g.Logger})
 		signalHandler = new(runsignal.Handler)
 	)
-	g.Register(extAuthz, proxy, signalHandler)
+	g.Register(extAuthz, rateLimit, proxy, signalHandler)
 	if err := g.Run(); err != nil {
 		fmt.Printf("program exit: %+v\n", err)
 		os.Exit(1)
