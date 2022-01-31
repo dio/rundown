@@ -67,14 +67,15 @@ func NewSettings(s *settingsv1.Settings) settings.Settings { //nolint:gocyclo
 	}
 
 	// Statsd-related settings. The github.com/envoyproxy/ratelimit uses github.com/lyft/gostats for
-	// setting up statsd, the library expects environment USE_STATSD and STATSD_* variables, namely:
+	// setting up statsd, the library expects some environment variables to be set in place, namely:
 	//   - USE_STATSD, defaults to true.
 	//   - STATSD_HOST, defaults to "localhost".
 	//   - STATSD_PORT, defaults to 8125.
 	// Reference: https://github.com/lyft/gostats/blob/aa005a717918424bef89063bdac8772d976782f8/settings.go#L28-L34.
 	//
-	// Note: STATSD_PROTOCOL, defaults to "tcp", is not exposed by github.com/envoyproxy/ratelimit.
-	// See https://github.com/envoyproxy/ratelimit/blob/8d6488ead8618ce49a492858321dae946f2d97bc/src/settings/settings.go#L34-L36.
+	// Note: Another relevant variable, STATSD_PROTOCOL (defaults to "tcp") is not exposed in
+	// github.com/envoyproxy/ratelimit. See:
+	// https://github.com/envoyproxy/ratelimit/blob/8d6488ead8618ce49a492858321dae946f2d97bc/src/settings/settings.go#L34-L36.
 	//
 	// Hence, we also do setenv here.
 	if s.UseStatsd != nil {
