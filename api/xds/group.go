@@ -31,7 +31,6 @@ import (
 	secretservice "github.com/envoyproxy/go-control-plane/envoy/service/secret/v3"
 	cache "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	ratelimitrunner "github.com/envoyproxy/ratelimit/src/service_cmd/runner"
 	"github.com/tetratelabs/run"
 	"github.com/tetratelabs/telemetry"
 	"google.golang.org/grpc"
@@ -70,9 +69,9 @@ func New(g *run.Group, cfg *Config) *Service {
 type Service struct {
 	cfg        *Config
 	g          *run.Group
-	runner     *ratelimitrunner.Runner
 	managed    *managed.Flags
 	server     server.Server
+	listener   net.Listener
 	grpcServer *grpc.Server
 	cache      cache.SnapshotCache
 }
@@ -145,26 +144,22 @@ func (s *Service) PreRun() (err error) {
 
 	s.server = server.NewServer(ctx, s.cache, &callbacks{})
 
-	// TODO(dio): Take this grpc server setup to a dedicated module.
+	// TODO(dio): Take this gRPC server setup to a dedicated module.
 	s.grpcServer = grpc.NewServer()
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.cfg.Config.Host, s.cfg.Config.Port))
 	if err != nil {
 		return err
 	}
+	s.listener = listener
+
 	// This probably requires refactoring. It depends on how we do tests.
-	return s.registerAndServe(listener)
+	s.registerServiceServers()
+	return nil
 }
 
 // Serve runs the service.
 func (s *Service) Serve() (err error) {
-	defer func() {
-		recovered := recover()
-		if err != nil {
-			err = recovered.(error)
-		}
-	}()
-	s.runner.Run()
-	return
+	return s.grpcServer.Serve(s.listener)
 }
 
 // GracefulStop stops the underlying process by sending interrupt.
@@ -172,7 +167,7 @@ func (s *Service) GracefulStop() {
 	s.grpcServer.GracefulStop()
 }
 
-func (s *Service) registerAndServe(listener net.Listener) error {
+func (s *Service) registerServiceServers() {
 	// Register services.
 	discoveryservice.RegisterAggregatedDiscoveryServiceServer(s.grpcServer, s.server)
 	endpointservice.RegisterEndpointDiscoveryServiceServer(s.grpcServer, s.server)
@@ -181,7 +176,6 @@ func (s *Service) registerAndServe(listener net.Listener) error {
 	listenerservice.RegisterListenerDiscoveryServiceServer(s.grpcServer, s.server)
 	secretservice.RegisterSecretDiscoveryServiceServer(s.grpcServer, s.server)
 	runtimeservice.RegisterRuntimeDiscoveryServiceServer(s.grpcServer, s.server)
-	return s.grpcServer.Serve(listener)
 }
 
 type logger struct{}

@@ -16,13 +16,11 @@ syntax = "proto3";
 
 package xds.config.v1;
 
-import "google/protobuf/wrappers.proto";
-
 option go_package = "github.com/dio/rundown/generated/xds/config/v1";
 
 message Config {
   // Server host.
-  google.protobuf.StringValue host = 1;
+  string host = 1;
   // Server port.
-  google.protobuf.UInt32Value port = 2;
+  int32 port = 2;
 }

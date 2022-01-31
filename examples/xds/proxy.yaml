@@ -1,0 +1,70 @@
+# Copyright 2022 Dhi Aurrahman
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+node:
+  id: test-id
+  cluster: test
+
+admin:
+  address:
+    socket_address:
+      protocol: TCP
+      address: 0.0.0.0
+      port_value: 9901
+
+dynamic_resources:
+  lds_config:
+    ads: {}
+    initial_fetch_timeout: 0s
+    resource_api_version: V3
+  cds_config:
+    ads: {}
+    initial_fetch_timeout: 0s
+    resource_api_version: V3
+  ads_config:
+    api_type: GRPC
+    set_node_on_first_message_only: true
+    transport_api_version: V3
+    grpc_services:
+      - envoy_grpc:
+          cluster_name: xds-grpc
+
+static_resources:
+  clusters:
+    - name: xds-grpc
+      connect_timeout: 1s
+      type: STRICT_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      upstream_connection_options:
+        tcp_keepalive:
+          keepalive_time: 300
+      max_requests_per_connection: 1
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options:
+              connection_keepalive:
+                interval: 30s
+                timeout: 5s
+      load_assignment:
+        cluster_name: xds-grpc
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: localhost
+                      port_value: 8080

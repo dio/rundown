@@ -20,6 +20,7 @@ import (
 	"os"
 
 	bootstrapv3 "github.com/envoyproxy/go-control-plane/envoy/config/bootstrap/v3"
+	_ "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3" // allow to resolve envoy.extensions.upstreams.http.v3.*
 	"github.com/tetratelabs/run"
 	runsignal "github.com/tetratelabs/run/pkg/signal"
 	"github.com/tetratelabs/telemetry"
@@ -27,6 +28,8 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/dio/rundown/api/proxy"
+	"github.com/dio/rundown/api/xds"
+	configv1 "github.com/dio/rundown/generated/xds/config/v1"
 )
 
 //go:embed proxy.yaml
@@ -34,15 +37,15 @@ var configYAML []byte
 
 func main() {
 	var (
-		logger      = telemetry.NoopLogger()
-		g           = &run.Group{Name: "example", Logger: logger}
-		proxyServer = proxy.New(g, &proxy.Config{
-			Logger:         g.Logger,
-			GenerateConfig: generate,
-		})
-		signalHandler = new(runsignal.Handler)
+		logger            = telemetry.NoopLogger()
+		g                 = &run.Group{Name: "example", Logger: logger}
+		xdsServerConfig   = &configv1.Config{Host: "localhost", Port: 8080}
+		xdsServer         = xds.New(g, &xds.Config{Logger: g.Logger, Config: xdsServerConfig})
+		proxyServerConfig = &proxy.Config{Logger: g.Logger, GenerateConfig: generate}
+		proxyServer       = proxy.New(g, proxyServerConfig)
+		signalHandler     = new(runsignal.Handler)
 	)
-	g.Register(proxyServer, signalHandler)
+	g.Register(xdsServer, proxyServer, signalHandler)
 	if err := g.Run(); err != nil {
 		fmt.Printf("program exit: %+v\n", err)
 		os.Exit(1)
