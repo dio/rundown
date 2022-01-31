@@ -118,7 +118,7 @@ check: ## Make sure we follow the rules
 	fi
 
 license_ignore :=
-license_files  := api examples internal ratelimit buf.*.yaml Makefile *.mk
+license_files  := api examples internal ratelimit xds buf.*.yaml Makefile *.mk
 license: $(addlicense) ## To add license
 	@$(addlicense) $(license_ignore) -c "Dhi Aurrahman"  $(license_files) 1>/dev/null 2>&1
 
