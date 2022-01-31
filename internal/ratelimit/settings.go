@@ -15,13 +15,13 @@
 package ratelimit
 
 import (
-	rl "github.com/envoyproxy/ratelimit/src/settings"
+	"github.com/envoyproxy/ratelimit/src/settings"
 
-	"github.com/dio/rundown/generated/ratelimit/settings"
+	settingsv1 "github.com/dio/rundown/generated/ratelimit/settings/v1"
 )
 
-func NewSettings(s *settings.Settings) rl.Settings { //nolint:gocyclo
-	c := rl.NewSettings()
+func NewSettings(s *settingsv1.Settings) settings.Settings { //nolint:gocyclo
+	c := settings.NewSettings()
 
 	// I know this looks tedious, we could have a generator somehow later, but this works.
 

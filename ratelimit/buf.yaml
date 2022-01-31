@@ -16,9 +16,5 @@ version: v1
 name: buf.build/dio/ratelimit
 
 lint:
-  allow_comment_ignores: true
   use:
-    - BASIC
-  except:
-    - FIELD_LOWER_SNAKE_CASE
-    - PACKAGE_DIRECTORY_MATCH
+    - DEFAULT

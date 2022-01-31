@@ -27,7 +27,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"sigs.k8s.io/yaml"
 
-	"github.com/dio/rundown/generated/ratelimit/settings"
+	settingsv1 "github.com/dio/rundown/generated/ratelimit/settings/v1"
 	"github.com/dio/rundown/internal/managed"
 	"github.com/dio/rundown/internal/ratelimit"
 )
@@ -35,7 +35,7 @@ import (
 // Config holds the configuration object for running the rate-limit service.
 type Config struct {
 	Logger   telemetry.Logger
-	Settings *settings.Settings
+	Settings *settingsv1.Settings
 }
 
 // New returns a new run.Service that wraps rate-limit service. Setting the cfg to nil, expecting
@@ -93,7 +93,7 @@ func (s *Service) Validate() error {
 			}
 		}
 
-		var cfg settings.Settings
+		var cfg settingsv1.Settings
 		if err = protojson.Unmarshal(b, &cfg); err != nil {
 			return err
 		}
