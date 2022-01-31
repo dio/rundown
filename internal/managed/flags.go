@@ -24,11 +24,10 @@ import (
 
 // Flags holds common flags that can be shared across services.
 type Flags struct {
-	DefaultVersion    string
-	Version           string
-	Dir               string
-	ConfigFile        string
-	CanBeDisabledOnly bool
+	DefaultVersion string
+	Version        string
+	Dir            string
+	ConfigFile     string
 
 	disabled bool
 	g        *run.Group
@@ -42,8 +41,9 @@ func (m *Flags) Manage(flags *run.FlagSet, g *run.Group, s run.Service) {
 	}
 	title := titleize(s.Name())
 
-	// When CanBeDisabledOnly is true, we skip registering unrelated flags.
-	if !m.CanBeDisabledOnly {
+	// When default version is not defined, we should not register the version flag, since it is
+	// probably hardcoded or not relevant (e.g. for internal implementation).
+	if m.DefaultVersion != "" {
 		// --<name>-version. For example: --proxy-version.
 		flags.StringVar(
 			&m.Version,
@@ -51,15 +51,15 @@ func (m *Flags) Manage(flags *run.FlagSet, g *run.Group, s run.Service) {
 			m.DefaultVersion,
 			title+" version",
 		)
-
-		// --<name>-directory. For example: --proxy-directory.
-		flags.StringVar(
-			&m.Dir,
-			s.Name()+"-directory",
-			os.Getenv(strcase.ToScreamingSnake(s.Name())+"_HOME"),
-			"Path to the "+title+" work directory",
-		)
 	}
+
+	// --<name>-directory. For example: --proxy-directory.
+	flags.StringVar(
+		&m.Dir,
+		s.Name()+"-directory",
+		os.Getenv(strcase.ToScreamingSnake(s.Name())+"_HOME"),
+		"Path to the "+title+" work directory",
+	)
 
 	// --<name>-config. For example: --proxy-config.
 	flags.StringVar(

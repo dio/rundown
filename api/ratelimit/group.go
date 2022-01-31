@@ -45,11 +45,9 @@ func New(g *run.Group, cfg *Config) *Service {
 		cfg = &Config{} // TODO(dio): Have a way to generate default config.
 	}
 	return &Service{
-		cfg: cfg,
-		g:   g,
-		managed: &managed.Flags{
-			CanBeDisabledOnly: true, // Allow for disable flag generation and checking only.
-		},
+		cfg:     cfg,
+		g:       g,
+		managed: &managed.Flags{},
 	}
 }
 
@@ -113,7 +111,10 @@ func (s *Service) PreRun() error {
 	if s.managed.IsDisabled() {
 		return nil
 	}
-	runner := ratelimitrunner.NewRunner(ratelimit.NewSettings(s.cfg.Settings))
+	configured := ratelimit.NewSettings(s.cfg.Settings)
+	// TODO(dio): Set the runtime path https://github.com/envoyproxy/ratelimit/blob/8d6488ead8618ce49a492858321dae946f2d97bc/src/settings/settings.go#L40-L43
+	// to be matched with configured work directory (e.g. via flag).
+	runner := ratelimitrunner.NewRunner(configured)
 	s.runner = &runner
 	return nil
 }
