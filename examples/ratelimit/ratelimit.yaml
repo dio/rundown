@@ -12,8 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: v1
-directories:
-  - authservice
-  - ratelimit
-  - xds
+# Reference: https://github.com/envoyproxy/ratelimit/blob/8d6488ead8618ce49a492858321dae946f2d97bc/docker-compose-example.yml#L43-L51.
+host: 0.0.0.0
+port: 8080
+grpc_host: 0.0.0.0
+grpc_port: 8081
+use_statsd: false
+log_level: DEBUG
+redis_socket_type: tcp
+redis_url: 127.0.0.1:6379
+
+# The expected files from the combination of "runtime_path" and "runtime_subdirectory" below is "/tmp/ok/ratelimit/config".
+runtime_path: /tmp/ok
+runtime_subdirectory: ratelimit
+runtime_watch_root: false
+runtime_ignore_dot_files: true

@@ -21,11 +21,13 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/tetratelabs/run"
 	"github.com/tetratelabs/telemetry"
 	"google.golang.org/protobuf/encoding/protojson"
+	"sigs.k8s.io/yaml"
 
 	"github.com/dio/rundown/generated/authservice/config"
 	"github.com/dio/rundown/internal/archives"
@@ -106,6 +108,15 @@ func (s *Service) Validate() error {
 		if err != nil {
 			return err
 		}
+
+		// Probably a .yaml file. We simply check the extension here.
+		if filepath.Ext(s.managed.ConfigFile) == ".yaml" || filepath.Ext(s.managed.ConfigFile) == ".yml" {
+			b, err = yaml.YAMLToJSON(b)
+			if err != nil {
+				return fmt.Errorf("failed to load config: %w", err)
+			}
+		}
+
 		var cfg config.Config
 		if err = protojson.Unmarshal(b, &cfg); err != nil {
 			return err
@@ -114,7 +125,7 @@ func (s *Service) Validate() error {
 	}
 
 	if s.cfg.FilterConfig == nil {
-		return errors.New("filter config is required")
+		return errors.New("auth service config is required")
 	}
 	return s.cfg.FilterConfig.ValidateAll()
 }

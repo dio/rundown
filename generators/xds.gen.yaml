@@ -13,7 +13,17 @@
 # limitations under the License.
 
 version: v1
-directories:
-  - authservice
-  - ratelimit
-  - xds
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/dio/rundown/generated/xds
+    except:
+      - buf.build/envoyproxy/protoc-gen-validate
+
+plugins:
+  - name: go
+    out: generated/xds
+    opt: paths=source_relative
+  - name: validate
+    out: generated/xds
+    opt: paths=source_relative,lang=go

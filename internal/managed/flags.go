@@ -28,6 +28,9 @@ type Flags struct {
 	Version        string
 	Dir            string
 	ConfigFile     string
+	// Titleize allows to override the titleize. You want to use this, e.g. for preserving casing
+	// for xDS (the default titleize gives Xds).
+	Titleize func(string) string
 
 	disabled bool
 	g        *run.Group
@@ -39,7 +42,10 @@ func (m *Flags) Manage(flags *run.FlagSet, g *run.Group, s run.Service) {
 	if g == nil {
 		return
 	}
-	title := titleize(s.Name())
+	if m.Titleize == nil {
+		m.Titleize = titleize
+	}
+	title := m.Titleize(s.Name())
 
 	// When default version is not defined, we should not register the version flag, since it is
 	// probably hardcoded or not relevant (e.g. for internal implementation).
