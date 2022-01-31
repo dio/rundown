@@ -56,63 +56,9 @@ func (m *Config) validate(all bool) error {
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetHost()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ConfigValidationError{
-					field:  "Host",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ConfigValidationError{
-					field:  "Host",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetHost()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ConfigValidationError{
-				field:  "Host",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for Host
 
-	if all {
-		switch v := interface{}(m.GetPort()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ConfigValidationError{
-					field:  "Port",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ConfigValidationError{
-					field:  "Port",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetPort()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ConfigValidationError{
-				field:  "Port",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for Port
 
 	if len(errors) > 0 {
 		return ConfigMultiError(errors)

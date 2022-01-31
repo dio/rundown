@@ -42,6 +42,7 @@ func DownloadVersionedBinary(ctx context.Context, archive archives.Archive, dest
 		downloadURL := GetArchiveURL(archive)
 		// TODO(dio): Streaming the bytes from remote file. We decided to use this for skipping copying
 		// the retry logic that has already implemented in github.com/bazelbuild/bazelisk/httputil.
+		fmt.Println("downloading", downloadURL, "...")
 		data, _, err := httputil.ReadRemoteFile(downloadURL, "")
 		if err != nil {
 			return "", fmt.Errorf("failed to read remote file: %s: %w", downloadURL, err)

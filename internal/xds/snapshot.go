@@ -157,7 +157,7 @@ func makeConfigSource() *core.ConfigSource {
 			SetNodeOnFirstMessageOnly: true,
 			GrpcServices: []*core.GrpcService{{
 				TargetSpecifier: &core.GrpcService_EnvoyGrpc_{
-					EnvoyGrpc: &core.GrpcService_EnvoyGrpc{ClusterName: "xds_cluster"},
+					EnvoyGrpc: &core.GrpcService_EnvoyGrpc{ClusterName: "xds-grpc"},
 				},
 			}},
 		},
