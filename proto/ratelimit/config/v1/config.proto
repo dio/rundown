@@ -1,0 +1,42 @@
+// Copyright 2022 Dhi Aurrahman
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package ratelimit.config.v1;
+
+option go_package = "github.com/dio/rundown/generated/ratelimit/config/v1";
+
+// This is the proto representaion of https://github.com/envoyproxy/ratelimit/blob/8d6488ead8618ce49a492858321dae946f2d97bc/src/config/config_impl.go#L16-L33.
+// This is manually syncronized.
+// TODO(dio): Parse https://github.com/envoyproxy/ratelimit/blob/main/src/config/config_impl.go and
+// generate this message (always to sync with main).
+message Config {
+  string domain = 1;
+  repeated Descriptor descriptors = 2;
+}
+
+message Descriptor {
+  string key = 1;
+  string value = 2;
+  RateLimit rate_limit = 3;
+  repeated Descriptor descriptors = 4;
+  bool shadow_mode = 5;
+}
+
+message RateLimit {
+  uint32 requests_per_unit = 1;
+  string unit = 2;
+  bool unlimited = 3;
+}

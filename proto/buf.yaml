@@ -13,17 +13,8 @@
 # limitations under the License.
 
 version: v1
-managed:
-  enabled: true
-  go_package_prefix:
-    default: github.com/dio/rundown/generated/ratelimit
-    except:
-      - buf.build/envoyproxy/protoc-gen-validate
+name: buf.build/rundown/proto
 
-plugins:
-  - name: go
-    out: generated/ratelimit
-    opt: paths=source_relative
-  - name: validate
-    out: generated/ratelimit
-    opt: paths=source_relative,lang=go
+lint:
+  use:
+    - DEFAULT
