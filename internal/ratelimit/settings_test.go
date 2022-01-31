@@ -23,7 +23,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 	"sigs.k8s.io/yaml"
 
-	"github.com/dio/rundown/generated/ratelimit/settings"
+	settingsv1 "github.com/dio/rundown/generated/ratelimit/settings/v1"
 	"github.com/dio/rundown/internal/ratelimit"
 )
 
@@ -31,7 +31,7 @@ import (
 var config []byte
 
 func TestNewSettings(t *testing.T) {
-	s := &settings.Settings{
+	s := &settingsv1.Settings{
 		Host: &wrapperspb.StringValue{Value: "127.0.0.1"},
 	}
 	c := ratelimit.NewSettings(s)
@@ -41,7 +41,7 @@ func TestNewSettings(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, j) // Because when "j" is nil, it is not an error.
 
-	var s1 settings.Settings
+	var s1 settingsv1.Settings
 	require.NoError(t, protojson.Unmarshal(j, &s1))
 
 	c1 := ratelimit.NewSettings(&s1)
