@@ -22,23 +22,23 @@ import (
 	runsignal "github.com/tetratelabs/run/pkg/signal"
 	"github.com/tetratelabs/telemetry"
 
-	extauthz "github.com/dio/rundown/api/ext_authz"
-	envoy "github.com/dio/rundown/api/proxy"
-	ratelimit "github.com/dio/rundown/api/ratelimit"
-	xds "github.com/dio/rundown/api/xds"
+	"github.com/dio/rundown/api/auth"
+	"github.com/dio/rundown/api/proxy"
+	"github.com/dio/rundown/api/ratelimit"
+	"github.com/dio/rundown/api/xds"
 )
 
 func main() {
 	var (
-		logger        = telemetry.NoopLogger()
-		g             = &run.Group{Name: "example", Logger: logger}
-		xDS           = xds.New(g, &xds.Config{Logger: g.Logger})
-		extAuthz      = extauthz.New(g, &extauthz.Config{Logger: g.Logger})
-		rateLimit     = ratelimit.New(g, &ratelimit.Config{Logger: g.Logger})
-		proxy         = envoy.New(g, &envoy.Config{Logger: g.Logger})
-		signalHandler = new(runsignal.Handler)
+		logger          = telemetry.NoopLogger()
+		g               = &run.Group{Name: "example", Logger: logger}
+		xDS             = xds.New(g, &xds.Config{Logger: g.Logger})
+		authServer      = auth.New(g, &auth.Config{Logger: g.Logger})
+		ratelimitServer = ratelimit.New(g, &ratelimit.Config{Logger: g.Logger})
+		proxyServer     = proxy.New(g, &proxy.Config{Logger: g.Logger})
+		signalHandler   = new(runsignal.Handler)
 	)
-	g.Register(xDS, extAuthz, rateLimit, proxy, signalHandler)
+	g.Register(xDS, authServer, ratelimitServer, proxyServer, signalHandler)
 	if err := g.Run(); err != nil {
 		fmt.Printf("program exit: %+v\n", err)
 		os.Exit(1)

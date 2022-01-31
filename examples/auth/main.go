@@ -25,24 +25,24 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"sigs.k8s.io/yaml"
 
-	extAuthz "github.com/dio/rundown/api/ext_authz"
+	"github.com/dio/rundown/api/auth"
 	"github.com/dio/rundown/generated/authservice/config"
 )
 
-//go:embed ext_authz.yaml
+//go:embed auth.yaml
 var configYAML []byte
 
 func main() {
 	var (
-		logger = telemetry.NoopLogger()
-		g      = &run.Group{Name: "example", Logger: logger}
-		proxy  = extAuthz.New(g, &extAuthz.Config{
+		logger     = telemetry.NoopLogger()
+		g          = &run.Group{Name: "example", Logger: logger}
+		authServer = auth.New(g, &auth.Config{
 			Logger:         g.Logger,
 			GenerateConfig: generate,
 		})
 		signalHandler = new(runsignal.Handler)
 	)
-	g.Register(proxy, signalHandler)
+	g.Register(authServer, signalHandler)
 	if err := g.Run(); err != nil {
 		fmt.Printf("program exit: %+v\n", err)
 		os.Exit(1)

@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"sigs.k8s.io/yaml"
 
-	envoy "github.com/dio/rundown/api/proxy"
+	"github.com/dio/rundown/api/proxy"
 	bootstrapv3 "github.com/envoyproxy/go-control-plane/envoy/config/bootstrap/v3"
 )
 
@@ -34,15 +34,15 @@ var configYAML []byte
 
 func main() {
 	var (
-		logger = telemetry.NoopLogger()
-		g      = &run.Group{Name: "example", Logger: logger}
-		proxy  = envoy.New(g, &envoy.Config{
+		logger      = telemetry.NoopLogger()
+		g           = &run.Group{Name: "example", Logger: logger}
+		proxyServer = proxy.New(g, &proxy.Config{
 			Logger:         g.Logger,
 			GenerateConfig: generate,
 		})
 		signalHandler = new(runsignal.Handler)
 	)
-	g.Register(proxy, signalHandler)
+	g.Register(proxyServer, signalHandler)
 	if err := g.Run(); err != nil {
 		fmt.Printf("program exit: %+v\n", err)
 		os.Exit(1)
